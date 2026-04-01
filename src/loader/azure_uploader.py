@@ -3,17 +3,20 @@ import json
 from datetime import datetime
 from dotenv import load_dotenv
 from azure.storage.blob import BlobServiceClient
+from src.utils.logger import get_logger
 
 load_dotenv()
+
+logger = get_logger(__name__)
 
 
 class AzureUploader:
     def __init__(self):
-        self.connection_string = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
+        self.connection_string = os.getenv("AZURE_CONNECTION_STRING")
         self.container_name = os.getenv("AZURE_CONTAINER_NAME")
 
         if not self.connection_string:
-            raise ValueError("AZURE_STORAGE_CONNECTION_STRING 환경변수가 없습니다.")
+            raise ValueError("AZURE_CONNECTION_STRING 환경변수가 없습니다.")
         if not self.container_name:
             raise ValueError("AZURE_CONTAINER_NAME 환경변수가 없습니다.")
 
@@ -32,11 +35,11 @@ class AzureUploader:
             json_string = json.dumps(data, ensure_ascii=False, indent=2)
             blob_client.upload_blob(json_string, overwrite=True)
 
-            print(f"[Azure] 업로드 성공: {blob_path} ({len(data)}건)")
+            logger.info(f"업로드 성공: {blob_path} ({len(data)}건)")
             return True
 
         except Exception as e:
-            print(f"[Azure ERROR] 업로드 실패: {e}")
+            logger.error(f"업로드 실패: {e}")
             return False
 
 
